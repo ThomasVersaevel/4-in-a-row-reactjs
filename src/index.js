@@ -165,7 +165,6 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<Game />);
 
 function calculateWinner(squares) {
-  console.log('calc winner');
   let done = null;
   for (let i = 0; i < 7; i++) {
     for (let j = 0; j < 5; j++) {
