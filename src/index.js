@@ -14,44 +14,18 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      squares: Array(35).fill(null),
-      xIsNext: true,
-    };
-  }
-
-  handleClick(i) {
-    const squares = this.state.squares.slice();
-    squares[i] = this.state.xIsNext ? 'X' : 'O';;
-    this.setState({ 
-      squares: squares, 
-      xIsNext: !this.state.xIsNext, 
-      winner: null,
-    });
-  }
-
   renderSquare(i) {
     return (
       <Square
-        value={this.state.squares[i]}
-        onClick={() => this.handleClick(i)}
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
       />
     );
   }
 
   render() {
-    calculateWinnerSmart(this.state.squares);
-    let status;
-    if (this.state.winner) {
-      status = 'Winner: ' + this.state.winner;
-    } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-    }
     return (
       <div>
-        <div className="status">{status}</div>
         <div className="board-row">
           {this.renderSquare(28)}
           {this.renderSquare(29)}
@@ -103,15 +77,82 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      history: [{
+        squares: Array(35).fill(null),
+      }],
+      stepNumber: 0,  
+      xIsNext: true,
+    };
+  }
+
+  handleClick(i) {
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    for (let j = 0; j < 5; j++) {
+      //console.log('now doing for: '+((i % 7) + 7*j))
+      if (!squares[(i % 7) + 7*j]) {
+        //console.log(i+ 'fills square :' +(i % 7) + 7*j)
+        squares[(i % 7) + 7*j] = this.state.xIsNext ? 'X' : 'O';
+        break;
+      }
+    }
+    this.setState({
+      history: history.concat([{
+        squares: squares,
+      }]),
+      stepNumber: history.length,
+      xIsNext: !this.state.xIsNext,
+    });
+  }
+
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+    });
+  }
+
   render() {
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = calculateWinner(current.squares);
+
+    const moves = history.map((step, move) => {
+      const desc = move ?
+        'Go to move #' + move :
+        'Go to game start';
+      return (
+        <li key={move}>
+          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+        </li>
+      );
+    });
+
+    let status;
+    if (winner) {
+      status = 'Winner: ' + winner;
+    } else {
+      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+    }
+
     return (
       <div className="game">
         <div className="game-board">
-          <Board />
+          <Board
+            squares={current.squares}
+            onClick={(i) => this.handleClick(i)}
+          />
         </div>
         <div className="game-info">
-          <div>{/* status */}</div>
-          <ol>{/* TODO */}</ol>
+          <div>{status}</div>
+          <ol>{moves}</ol>
         </div>
       </div>
     );
@@ -123,38 +164,52 @@ class Game extends React.Component {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<Game />);
 
-function calculateWinnerSmart(squares) {
+function calculateWinner(squares) {
   console.log('calc winner');
+  let done = null;
   for (let i = 0; i < 7; i++) {
     for (let j = 0; j < 5; j++) {
       if (squares[i+7*j] === 'X') { // if an X is present check around it
-        check(squares, i, j, 'X');
+        done = check(squares, i, j, 'X');
+        console.log('checking for i: '+i+' j: '+j)
+        if (done) {
+          return done;
+        }
       } else if (squares[i+7*j] === 'O') { // if an X is present check around it
-        check(squares, i, j, 'O');
+        done = check(squares, i, j, 'O');
+        console.log('checking for i: '+i+' j: '+j)
+        if (done) {
+          return done;
+        }
       }
     }
   }
+  return null;
 }
 
 function check(squares, i, j, p) {
   if (i < 6) {           // check right side
     if (squares[i+1+7*j] === p) {
-      recurse(squares, i+1, j, p, 'r', 2)
+      //console.log('rechts: '+i)
+      return recurse(squares, i+1, j, p, 'r', 2)
     }
   }
   if (i < 6 && j < 4) {  // top right
     if (squares[i+1+7*(j+1)] === p) {
-      recurse(squares, i+1, j+1, p, 'tr', 2)
+      //console.log('rechts boven: '+i)
+      return recurse(squares, i+1, j+1, p, 'tr', 2)
     }
   }
-  if (i > 0 && j < 4) {           // top left
+  if (i > 0 && j < 4) {  // top left
     if (squares[i-1+7*(j+1)] === p) {
-      recurse(squares, i-1, j+1, p, 'tl', 2)
+      //console.log('links boven: '+i)
+      return recurse(squares, i-1, j+1, p, 'tl', 2)
     }
   }
   if (j < 4) {           // top
+    //console.log('up: '+i)
     if (squares[i+7*(j+1)] === p) {
-      recurse(squares, i, j+1, p, 't', 2)
+      return recurse(squares, i, j+1, p, 't', 2)
     }
   }
 }
@@ -166,39 +221,34 @@ function check(squares, i, j, p) {
  seq: amount of symbols found so far
  */
 function recurse(squares, i, j, p, dir, seq) {
-  if (seq == 4) { //if 4 in a row
-    winnerFound(p, dir);
+  if (seq == 4) { //if 4 in a row we have a winner
+    console.log('winner: '+p)
+    return p;
   }
   if (dir === 'r') {           // check right side
     if (squares[i+1+7*j] === p) {
-      recurse(squares, i+1, j, p, 'r', seq+1)
+      return recurse(squares, i+1, j, p, 'r', seq+1)
     }
   }
   if (dir === 'tr') {  // top right
     if (squares[i+1+7*(j+1)] === p) {
-      recurse(squares, i+1, j+1, p, 'tr', seq+1)
+      return recurse(squares, i+1, j+1, p, 'tr', seq+1)
     }
   }
   if (dir === 'tl') {           // top left
     if (squares[i-1+7*(j+1)] === p) {
-      recurse(squares, i-1, j+1, p, 'tl', seq+1)
+      return recurse(squares, i-1, j+1, p, 'tl', seq+1)
     }
   }
   if (dir === 't') {           // top
     if (squares[i+7*(j+1)] === p) {
-      recurse(squares, i, j+1, p, 't', seq+1)
+      return recurse(squares, i, j+1, p, 't', seq+1)
     }
   }
-  return null;
+ // return null;
 }
 
-function winnerFound(p, dir) {
-  //set winner to p
-  Board.setState({winner: p});
-  console.log('winner found: '+p);
-}
-
-function calculateWinner(squares) {
+function calculateWinnerOld(squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
