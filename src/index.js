@@ -171,13 +171,13 @@ function calculateWinner(squares) {
     for (let j = 0; j < 5; j++) {
       if (squares[i+7*j] === 'X') { // if an X is present check around it
         done = check(squares, i, j, 'X');
-        console.log('checking for i: '+i+' j: '+j)
+        //console.log('checking for i: '+i+' j: '+j + ' Xarray: '+squares)
         if (done) {
           return done;
         }
       } else if (squares[i+7*j] === 'O') { // if an X is present check around it
         done = check(squares, i, j, 'O');
-        console.log('checking for i: '+i+' j: '+j)
+        //console.log('checking for i: '+i+' j: '+j + ' Oarray: '+squares)
         if (done) {
           return done;
         }
@@ -188,30 +188,28 @@ function calculateWinner(squares) {
 }
 
 function check(squares, i, j, p) {
+  let result;
   if (i < 6) {           // check right side
     if (squares[i+1+7*j] === p) {
-      //console.log('rechts: '+i)
-      return recurse(squares, i+1, j, p, 'r', 2)
+      result = recurse(squares, i+1, j, p, 'r', 2)
     }
   }
   if (i < 6 && j < 4) {  // top right
     if (squares[i+1+7*(j+1)] === p) {
-      //console.log('rechts boven: '+i)
-      return recurse(squares, i+1, j+1, p, 'tr', 2)
+      result = recurse(squares, i+1, j+1, p, 'tr', 2)
     }
   }
   if (i > 0 && j < 4) {  // top left
     if (squares[i-1+7*(j+1)] === p) {
-      //console.log('links boven: '+i)
-      return recurse(squares, i-1, j+1, p, 'tl', 2)
+      result = recurse(squares, i-1, j+1, p, 'tl', 2)
     }
   }
   if (j < 4) {           // top
-    //console.log('up: '+i)
     if (squares[i+7*(j+1)] === p) {
-      return recurse(squares, i, j+1, p, 't', 2)
+      result = recurse(squares, i, j+1, p, 't', 2)
     }
   }
+  return result;
 }
 
 /**  recurses on a found X or O with prams
@@ -221,31 +219,32 @@ function check(squares, i, j, p) {
  seq: amount of symbols found so far
  */
 function recurse(squares, i, j, p, dir, seq) {
+  let result;
   if (seq == 4) { //if 4 in a row we have a winner
     console.log('winner: '+p)
     return p;
   }
   if (dir === 'r') {           // check right side
     if (squares[i+1+7*j] === p) {
-      return recurse(squares, i+1, j, p, 'r', seq+1)
+      result = recurse(squares, i+1, j, p, 'r', seq+1)
     }
   }
   if (dir === 'tr') {  // top right
     if (squares[i+1+7*(j+1)] === p) {
-      return recurse(squares, i+1, j+1, p, 'tr', seq+1)
+      result = recurse(squares, i+1, j+1, p, 'tr', seq+1)
     }
   }
   if (dir === 'tl') {           // top left
     if (squares[i-1+7*(j+1)] === p) {
-      return recurse(squares, i-1, j+1, p, 'tl', seq+1)
+      result = recurse(squares, i-1, j+1, p, 'tl', seq+1)
     }
   }
   if (dir === 't') {           // top
     if (squares[i+7*(j+1)] === p) {
-      return recurse(squares, i, j+1, p, 't', seq+1)
+      result = recurse(squares, i, j+1, p, 't', seq+1)
     }
   }
- // return null;
+  return result;
 }
 
 function calculateWinnerOld(squares) {
