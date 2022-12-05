@@ -23,54 +23,31 @@ class Board extends React.Component {
     );
   }
 
+  renderField() {
+    // create an empty array to hold the squares
+    var squares = [];
+    // loop through rows
+    for (let i = 0; i < 5; i++) {
+      // create a row array
+      var row = [];
+      // loop through columns
+      for (let j = 0; j < 7; j++) {
+        // calculate the index for each square
+        const index = i * 7 + j;
+        // add the square to the row
+        row.push(this.renderSquare(index));
+      }
+      // add the row of squares to the field array
+      squares.push(<div key={i}>{row}</div>);
+    }
+    // return the array of rows
+    return squares;
+  }
+
   render() {
     return (
       <div>
-        <div className="board-row">
-          {this.renderSquare(28)}
-          {this.renderSquare(29)}
-          {this.renderSquare(30)}
-          {this.renderSquare(31)}
-          {this.renderSquare(32)}
-          {this.renderSquare(33)}
-          {this.renderSquare(34)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(21)}
-          {this.renderSquare(22)}
-          {this.renderSquare(23)}
-          {this.renderSquare(24)}
-          {this.renderSquare(25)}
-          {this.renderSquare(26)}
-          {this.renderSquare(27)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(14)}
-          {this.renderSquare(15)}
-          {this.renderSquare(16)}
-          {this.renderSquare(17)}
-          {this.renderSquare(18)}
-          {this.renderSquare(19)}
-          {this.renderSquare(20)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-          {this.renderSquare(9)}
-          {this.renderSquare(10)}
-          {this.renderSquare(11)}
-          {this.renderSquare(12)}
-          {this.renderSquare(13)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-          {this.renderSquare(6)}
-        </div>
+        {this.renderField()}
       </div>
     );
   }
@@ -83,7 +60,7 @@ class Game extends React.Component {
       history: [{
         squares: Array(35).fill(null),
       }],
-      stepNumber: 0,  
+      stepNumber: 0,
       xIsNext: true,
     };
   }
@@ -97,9 +74,9 @@ class Game extends React.Component {
     }
     for (let j = 0; j < 5; j++) {
       //console.log('now doing for: '+((i % 7) + 7*j))
-      if (!squares[(i % 7) + 7*j]) {
+      if (!squares[(i % 7) + 7 * j]) {
         //console.log(i+ 'fills square :' +(i % 7) + 7*j)
-        squares[(i % 7) + 7*j] = this.state.xIsNext ? 'X' : 'O';
+        squares[(i % 7) + 7 * j] = this.state.xIsNext ? 'X' : 'O';
         break;
       }
     }
@@ -168,13 +145,13 @@ function calculateWinner(squares) {
   let done = null;
   for (let i = 0; i < 7; i++) {
     for (let j = 0; j < 5; j++) {
-      if (squares[i+7*j] === 'X') { // if an X is present check around it
+      if (squares[i + 7 * j] === 'X') { // if an X is present check around it
         done = check(squares, i, j, 'X');
         //console.log('checking for i: '+i+' j: '+j + ' Xarray: '+squares)
         if (done) {
           return done;
         }
-      } else if (squares[i+7*j] === 'O') { // if an X is present check around it
+      } else if (squares[i + 7 * j] === 'O') { // if an X is present check around it
         done = check(squares, i, j, 'O');
         //console.log('checking for i: '+i+' j: '+j + ' Oarray: '+squares)
         if (done) {
@@ -189,23 +166,23 @@ function calculateWinner(squares) {
 function check(squares, i, j, p) {
   let result;
   if (i < 6) {           // check right side
-    if (squares[i+1+7*j] === p) {
-      result = recurse(squares, i+1, j, p, 'r', 2)
+    if (squares[i + 1 + 7 * j] === p) {
+      result = recurse(squares, i + 1, j, p, 'r', 2)
     }
   }
   if (i < 6 && j < 4) {  // top right
-    if (squares[i+1+7*(j+1)] === p) {
-      result = recurse(squares, i+1, j+1, p, 'tr', 2)
+    if (squares[i + 1 + 7 * (j + 1)] === p) {
+      result = recurse(squares, i + 1, j + 1, p, 'tr', 2)
     }
   }
   if (i > 0 && j < 4) {  // top left
-    if (squares[i-1+7*(j+1)] === p) {
-      result = recurse(squares, i-1, j+1, p, 'tl', 2)
+    if (squares[i - 1 + 7 * (j + 1)] === p) {
+      result = recurse(squares, i - 1, j + 1, p, 'tl', 2)
     }
   }
   if (j < 4) {           // top
-    if (squares[i+7*(j+1)] === p) {
-      result = recurse(squares, i, j+1, p, 't', 2)
+    if (squares[i + 7 * (j + 1)] === p) {
+      result = recurse(squares, i, j + 1, p, 't', 2)
     }
   }
   return result;
@@ -219,33 +196,33 @@ function check(squares, i, j, p) {
  */
 function recurse(squares, i, j, p, dir, seq) {
   let result;
-  if (seq == 4) { //if 4 in a row we have a winner
-    console.log('winner: '+p)
+  if (seq === 4) { //if 4 in a row we have a winner
+    console.log('winner: ' + p)
     return p;
   }
   if (dir === 'r') {           // check right side
-    if (squares[i+1+7*j] === p) {
-      result = recurse(squares, i+1, j, p, 'r', seq+1)
+    if (squares[i + 1 + 7 * j] === p) {
+      result = recurse(squares, i + 1, j, p, 'r', seq + 1)
     }
   }
   if (dir === 'tr') {  // top right
-    if (squares[i+1+7*(j+1)] === p) {
-      result = recurse(squares, i+1, j+1, p, 'tr', seq+1)
+    if (squares[i + 1 + 7 * (j + 1)] === p) {
+      result = recurse(squares, i + 1, j + 1, p, 'tr', seq + 1)
     }
   }
   if (dir === 'tl') {           // top left
-    if (squares[i-1+7*(j+1)] === p) {
-      result = recurse(squares, i-1, j+1, p, 'tl', seq+1)
+    if (squares[i - 1 + 7 * (j + 1)] === p) {
+      result = recurse(squares, i - 1, j + 1, p, 'tl', seq + 1)
     }
   }
   if (dir === 't') {           // top
-    if (squares[i+7*(j+1)] === p) {
-      result = recurse(squares, i, j+1, p, 't', seq+1)
+    if (squares[i + 7 * (j + 1)] === p) {
+      result = recurse(squares, i, j + 1, p, 't', seq + 1)
     }
   }
   return result;
 }
-
+// the old (bad) way to find a winner
 function calculateWinnerOld(squares) {
   const lines = [
     [0, 1, 2],
