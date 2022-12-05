@@ -24,23 +24,15 @@ class Board extends React.Component {
   }
 
   renderField() {
-    // create an empty array to hold the squares
     var squares = [];
-    // loop through rows
-    for (let i = 0; i < 5; i++) {
-      // create a row array
+    for (let i = 4; i > -1; i--) {
       var row = [];
-      // loop through columns
       for (let j = 0; j < 7; j++) {
-        // calculate the index for each square
         const index = i * 7 + j;
-        // add the square to the row
         row.push(this.renderSquare(index));
       }
-      // add the row of squares to the field array
       squares.push(<div key={i}>{row}</div>);
     }
-    // return the array of rows
     return squares;
   }
 
